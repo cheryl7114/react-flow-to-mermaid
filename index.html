@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- React Flow CSS and JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reactflow@11/dist/style.css">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/reactflow@11.11.4/dist/umd/index.js"></script>
+
+
+    <!-- Mermaid JS -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: false });
+        window.mermaid = mermaid;
+    </script>
+
+    <!-- Carbon Web Components -->
+    <script type="module"
+        src="https://1.www.s81c.com/common/carbon/web-components/tag/v2/latest/button.min.js"></script>
+    <script type="module"
+        src="https://1.www.s81c.com/common/carbon/web-components/tag/v2/latest/textarea.min.js"></script>
+
+
+    <!-- Carbon Styles (needed for base styling) -->
+    <link rel="stylesheet" href="https://unpkg.com/@carbon/styles@1.59.0/css/styles.css">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Flow to Mermaid</title>
+
+    <script src="script.js"></script>
+    <script>
+        async function handleConvert() {
+            // Convert to mermaid syntax
+            const mermaidSyntax = convertToMermaid(sampleData)
+
+            // Display the mermaid syntax in the textarea
+            document.getElementById('mermaidCode').value = mermaidSyntax;
+
+            // Render the mermaid diagram
+            const outputDiv = document.getElementById('mermaidOutput')
+            outputDiv.innerHTML = '' // Clear previous output
+
+            const { svg } = await mermaid.render('mermaid-diagram', mermaidSyntax)
+            outputDiv.innerHTML = svg
+
+            document.getElementById('exportSvgBtn').disabled = false
+        }
+
+        function exportAsSvg() {
+            const svg = document.querySelector('#mermaidOutput svg')
+            if (!svg) return
+
+            const svgData = new XMLSerializer().serializeToString(svg)
+            const blob = new Blob([svgData], { type: 'image/svg+xml' })
+            downloadFile(blob, 'mermaid-diagram.svg')
+        }
+
+        function downloadFile(blob, filename) {
+            const link = document.createElement('a')
+            link.href = URL.createObjectURL(blob)
+            link.download = filename
+            link.click()
+            URL.revokeObjectURL(link.href)
+        }
+    </script>
+    <style>
+        body {
+            padding: 3%;
+        }
+
+        #mermaidOutput {
+            margin-top: 2%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div style="margin-bottom: 2%">
+            <h2 style="margin-bottom: 1%">React Flow Graph</h2>
+            <div id="reactflow" style="width: 100%; height: 400px; border: 1px solid #ddd;"></div>
+        </div>
+
+        <!-- Convert button -->
+        <cds-button id="convertBtn" onClick="handleConvert()" onKeyPress="handleConvert()">Convert to
+            Mermaid</cds-button>
+
+        <div>
+            <h2 style="margin-bottom: 1%; margin-top: 3%">Mermaid Diagram</h2>
+            <cds-textarea id="mermaidCode" rows="8" readonly helper-text="TextArea helper text"
+                label="Mermaid code"></cds-textarea>
+            <div id="mermaidOutput"></div>
+        </div>
+
+        <cds-button id="exportSvgBtn" onClick="exportAsSvg()" disabled>Export As SVG</cds-button>
+    </div>
+
+    <script>
+        // Sample React Flow data demonstrating all three edge types
+        const sampleData = {
+            nodes: [
+                { id: 'start', data: { label: 'Start' }, position: { x: 250, y: 0 } },
+                { id: 'process', data: { label: 'Process Data' }, position: { x: 250, y: 80 } },
+                { id: 'validate', data: { label: 'Valid?' }, position: { x: 250, y: 160 } },
+                { id: 'success', data: { label: 'Success' }, position: { x: 100, y: 240 } },
+                { id: 'error', data: { label: 'Error Handler' }, position: { x: 400, y: 240 } }
+            ],
+            edges: [
+                // Default edge - sequential flow
+                { id: 'e1', source: 'start', target: 'process', type: 'default' },
+
+                // Default edge (type can be omitted)
+                { id: 'e2', source: 'process', target: 'validate' },
+
+                // Conditional edges - branching logic
+                {
+                    id: 'e3', source: 'validate', target: 'success',
+                    type: 'conditional', label: 'Yes'
+                },
+                {
+                    id: 'e4', source: 'validate', target: 'error',
+                    type: 'conditional', label: 'No'
+                },
+
+                // Error edge - exception handling
+                {
+                    id: 'e5', source: 'process', target: 'error',
+                    type: 'error', label: 'Exception'
+                }
+            ]
+        }
+
+        // Initialize React Flow
+        const { ReactFlow } = window.ReactFlow
+        const root = ReactDOM.createRoot(document.getElementById('reactflow'))
+
+        root.render(
+            React.createElement(ReactFlow, {
+                nodes: sampleData.nodes,
+                edges: sampleData.edges,
+                fitView: true
+            })
+        )
+    </script>
+
+</body>
+
+</html> 

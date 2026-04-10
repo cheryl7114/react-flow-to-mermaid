@@ -1,0 +1,22 @@
+{
+  "name": "react-flow-to-mermaid",
+  "version": "1.0.0",
+  "description": "A simple POC to convert React Flow graphs to Mermaid diagrams",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080 -o"
+  },
+  "keywords": [
+    "react-flow",
+    "mermaid",
+    "converter"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "dependencies": {
+    "@carbon/web-components": "^2.51.1"
+  }
+}
