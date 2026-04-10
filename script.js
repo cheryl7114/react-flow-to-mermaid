@@ -94,7 +94,12 @@ function convertToMermaid(reactFlowData) {
     const header = `flowchart ${direction}`
 
     // Group nodes by parent relationship
-    const nodes = convertNodes(reactFlowData.nodes)
+    const { parentMap, rootNodes } = groupNodesByParent(reactFlowData.nodes)
+
+    // Convert nodes (including subflows)
+    const nodes = convertNodes(rootNodes, parentMap)
+
+    // Convert edges
     const edges = convertEdges(reactFlowData.edges)
 
     return `${header}\n${nodes}\n${edges}`
