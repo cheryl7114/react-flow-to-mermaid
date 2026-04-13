@@ -47,6 +47,8 @@
             outputDiv.innerHTML = svg
 
             document.getElementById('exportSvgBtn').disabled = false
+            document.getElementById('exportPngBtn').disabled = false
+
         }
 
         function exportAsSvg() {
@@ -56,6 +58,44 @@
             const svgData = new XMLSerializer().serializeToString(svg)
             const blob = new Blob([svgData], { type: 'image/svg+xml' })
             downloadFile(blob, 'mermaid-diagram.svg')
+        }
+
+        function exportAsPng() {
+            const svg = document.querySelector('#mermaidOutput svg')
+            if (!svg) return
+
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d')
+            
+            // Get SVG dimensions from viewBox or bounding box
+            const bbox = svg.getBBox()
+            const viewBox = svg.viewBox.baseVal
+            const width = viewBox.width || bbox.width || 800
+            const height = viewBox.height || bbox.height || 600
+            
+            // Clone and set explicit dimensions on SVG
+            const svgClone = svg.cloneNode(true)
+            svgClone.setAttribute('width', width)
+            svgClone.setAttribute('height', height)
+            
+            const svgData = new XMLSerializer().serializeToString(svgClone)
+            const img = new Image()
+            
+            img.onload = function() {
+                const scale = 3
+                canvas.width = width * scale
+                canvas.height = height * scale
+                
+                ctx.scale(scale, scale)
+                ctx.drawImage(img, 0, 0, width, height)
+                
+                canvas.toBlob(function(blob) {
+                    downloadFile(blob, 'mermaid-diagram.png')
+                })
+            }
+            
+            const svgBase64 = btoa(unescape(encodeURIComponent(svgData)))
+            img.src = 'data:image/svg+xml;base64,' + svgBase64
         }
 
         function downloadFile(blob, filename) {
@@ -99,6 +139,7 @@
         </div>
 
         <cds-button id="exportSvgBtn" onClick="exportAsSvg()" disabled>Export As SVG</cds-button>
+        <cds-button id="exportPngBtn" onClick="exportAsPng()" disabled>Export As PNG</cds-button>
     </div>
 
     <script>
