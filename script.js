@@ -12,7 +12,14 @@ function sanitizeId(id) {
 function groupNodesByParent(nodes) {
     const parentMap = new Map()
     const rootNodes = []
+    const nodeMap = new Map()
 
+    // First pass: create a map of all nodes by ID
+    nodes.forEach(node => {
+        nodeMap.set(node.id, node)
+    })
+
+    // Second pass: build parent-child relationships
     nodes.forEach(node => {
         if (node.parentNode) {
             // This is a child node
@@ -21,7 +28,7 @@ function groupNodesByParent(nodes) {
             }
             parentMap.get(node.parentNode).push(node)
         } else {
-            // This is a root level node
+            // This is a root level node (no parent)
             rootNodes.push(node)
         }
     })
@@ -29,8 +36,9 @@ function groupNodesByParent(nodes) {
     return { parentMap, rootNodes }
 }
 
-function convertNodes(nodes, parentMap) {
+function convertNodes(nodes, parentMap, indentLevel = 1) {
     const lines = []
+    const indent = '    '.repeat(indentLevel)
 
     nodes.forEach(node => {
         const id = sanitizeId(node.id)
@@ -39,20 +47,17 @@ function convertNodes(nodes, parentMap) {
         // Check if this node is a parent node (has children)
         if (parentMap.has(node.id)) {
             // Create a subgraph
-            lines.push(`    subgraph ${id}[${label}]`)
+            lines.push(`${indent}subgraph ${id}[${label}]`)
 
-            // Add child nodes
+            // Recursively add child nodes (which may themselves be subgraphs)
             const children = parentMap.get(node.id)
-            children.forEach(child => {
-                const childId = sanitizeId(child.id);
-                const childLabel = child.data.label || child.id;
-                lines.push(`        ${childId}[${childLabel}]`);
-            })
+            const childLines = convertNodes(children, parentMap, indentLevel + 1)
+            lines.push(childLines)
 
-            lines.push(`    end`)
+            lines.push(`${indent}end`)
         } else {
-            // Regular node
-            lines.push(`    ${id}[${label}]`)
+            // Regular node (leaf node with no children)
+            lines.push(`${indent}${id}[${label}]`)
         }
     })
 

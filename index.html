@@ -143,7 +143,7 @@
     </div>
 
     <script>
-        // Sample React Flow data demonstrating all three edge types
+        // Sample React Flow data demonstrating nested subflows
         const sampleData = {
             nodes: [
                 // Root level nodes
@@ -154,7 +154,7 @@
                     id: 'processing',
                     data: { label: 'Data Processing' },
                     position: { x: 150, y: 100 },
-                    style: { width: 400, height: 250, backgroundColor: 'rgba(240, 240, 255, 0.5)' }
+                    style: { width: 500, height: 350, backgroundColor: 'rgba(240, 240, 255, 0.5)' }
                 },
 
                 // Child nodes inside processing subflow
@@ -165,76 +165,122 @@
                     extent: 'parent',
                     position: { x: 30, y: 40 }
                 },
+
+                // Nested subflow inside processing - Transformation Pipeline
                 {
-                    id: 'transform',
-                    data: { label: 'Transform Data' },
+                    id: 'transformPipeline',
+                    data: { label: 'Transformation Pipeline' },
                     parentNode: 'processing',
                     extent: 'parent',
-                    position: { x: 30, y: 120 }
+                    position: { x: 30, y: 120 },
+                    style: { width: 300, height: 150, backgroundColor: 'rgba(200, 200, 255, 0.5)' }
                 },
+
+                // Grandchild nodes inside transformPipeline (nested 2 levels deep)
+                {
+                    id: 'parse',
+                    data: { label: 'Parse' },
+                    parentNode: 'transformPipeline',
+                    extent: 'parent',
+                    position: { x: 20, y: 40 }
+                },
+                {
+                    id: 'normalize',
+                    data: { label: 'Normalize' },
+                    parentNode: 'transformPipeline',
+                    extent: 'parent',
+                    position: { x: 150, y: 40 }
+                },
+
                 {
                     id: 'enrich',
                     data: { label: 'Enrich' },
                     parentNode: 'processing',
                     extent: 'parent',
-                    position: { x: 220, y: 80 }
+                    position: { x: 350, y: 180 }
                 },
 
                 // Second subflow - Error Handling
                 {
                     id: 'errorHandling',
                     data: { label: 'Error Handling' },
-                    position: { x: 600, y: 150 },
-                    style: { width: 300, height: 180, backgroundColor: 'rgba(255, 240, 240, 0.5)' }
+                    position: { x: 700, y: 150 },
+                    style: { width: 350, height: 250, backgroundColor: 'rgba(255, 240, 240, 0.5)' }
                 },
 
-                // Child nodes inside error handling subflow
+                // Nested subflow inside errorHandling - Logging System
+                {
+                    id: 'loggingSystem',
+                    data: { label: 'Logging System' },
+                    parentNode: 'errorHandling',
+                    extent: 'parent',
+                    position: { x: 30, y: 40 },
+                    style: { width: 250, height: 120, backgroundColor: 'rgba(255, 200, 200, 0.5)' }
+                },
+
+                // Grandchild nodes inside loggingSystem
                 {
                     id: 'logError',
                     data: { label: 'Log Error' },
-                    parentNode: 'errorHandling',
+                    parentNode: 'loggingSystem',
                     extent: 'parent',
-                    position: { x: 30, y: 40 }
+                    position: { x: 20, y: 40 }
                 },
+                {
+                    id: 'logMetrics',
+                    data: { label: 'Log Metrics' },
+                    parentNode: 'loggingSystem',
+                    extent: 'parent',
+                    position: { x: 130, y: 40 }
+                },
+
                 {
                     id: 'notify',
                     data: { label: 'Notify Admin' },
                     parentNode: 'errorHandling',
                     extent: 'parent',
-                    position: { x: 30, y: 110 }
+                    position: { x: 30, y: 180 }
                 },
 
                 // More root level nodes
-                { id: 'decision', data: { label: 'Success?' }, position: { x: 350, y: 400 } },
-                { id: 'save', data: { label: 'Save to DB' }, position: { x: 250, y: 500 } },
-                { id: 'finish', data: { label: 'Finish' }, position: { x: 350, y: 600 } }
+                { id: 'decision', data: { label: 'Success?' }, position: { x: 400, y: 500 } },
+                { id: 'save', data: { label: 'Save to DB' }, position: { x: 300, y: 600 } },
+                { id: 'finish', data: { label: 'Finish' }, position: { x: 400, y: 700 } }
             ],
             edges: [
                 // Main flow
                 { id: 'e1', source: 'start', target: 'validate', label: 'Begin' },
                 
                 // Inside processing subflow
-                { id: 'e2', source: 'validate', target: 'transform' },
-                { id: 'e3', source: 'transform', target: 'enrich' },
+                { id: 'e2', source: 'validate', target: 'parse' },
+                
+                // Inside nested transformPipeline
+                { id: 'e3', source: 'parse', target: 'normalize' },
+                
+                // Exit nested subflow to parent subflow
+                { id: 'e4', source: 'normalize', target: 'enrich' },
                 
                 // Exit processing subflow
-                { id: 'e4', source: 'enrich', target: 'decision' },
+                { id: 'e5', source: 'enrich', target: 'decision' },
                 
                 // Decision branches
-                { id: 'e5', source: 'decision', target: 'save', label: 'Yes', type: 'conditional' },
-                { id: 'e6', source: 'decision', target: 'logError', label: 'No', type: 'conditional' },
+                { id: 'e6', source: 'decision', target: 'save', label: 'Yes', type: 'conditional' },
+                { id: 'e7', source: 'decision', target: 'logError', label: 'No', type: 'conditional' },
                 
-                // Inside error handling subflow
-                { id: 'e7', source: 'logError', target: 'notify' },
+                // Inside nested loggingSystem
+                { id: 'e8', source: 'logError', target: 'logMetrics' },
+                
+                // Exit nested subflow to parent subflow
+                { id: 'e9', source: 'logMetrics', target: 'notify' },
                 
                 // Error flow back to main
-                { id: 'e8', source: 'notify', target: 'finish', type: 'error' },
+                { id: 'e10', source: 'notify', target: 'finish', type: 'error' },
                 
                 // Success flow
-                { id: 'e9', source: 'save', target: 'finish' },
+                { id: 'e11', source: 'save', target: 'finish' },
                 
-                // Error edge from processing to error handling
-                { id: 'e10', source: 'transform', target: 'logError', label: 'Exception', type: 'error' }
+                // Error edge from nested subflow to another nested subflow
+                { id: 'e12', source: 'normalize', target: 'logError', label: 'Exception', type: 'error' }
             ]
         }
 
