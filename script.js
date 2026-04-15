@@ -12,14 +12,7 @@ function sanitizeId(id) {
 function groupNodesByParent(nodes) {
     const parentMap = new Map()
     const rootNodes = []
-    const nodeMap = new Map()
 
-    // First pass: create a map of all nodes by ID
-    nodes.forEach(node => {
-        nodeMap.set(node.id, node)
-    })
-
-    // Second pass: build parent-child relationships
     nodes.forEach(node => {
         if (node.parentNode) {
             // This is a child node
@@ -28,7 +21,7 @@ function groupNodesByParent(nodes) {
             }
             parentMap.get(node.parentNode).push(node)
         } else {
-            // This is a root level node (no parent)
+            // This is a root level node
             rootNodes.push(node)
         }
     })
@@ -36,9 +29,8 @@ function groupNodesByParent(nodes) {
     return { parentMap, rootNodes }
 }
 
-function convertNodes(nodes, parentMap, indentLevel = 1) {
+function convertNodes(nodes, parentMap) {
     const lines = []
-    const indent = '    '.repeat(indentLevel)
 
     nodes.forEach(node => {
         const id = sanitizeId(node.id)
@@ -47,17 +39,20 @@ function convertNodes(nodes, parentMap, indentLevel = 1) {
         // Check if this node is a parent node (has children)
         if (parentMap.has(node.id)) {
             // Create a subgraph
-            lines.push(`${indent}subgraph ${id}[${label}]`)
+            lines.push(`    subgraph ${id}[${label}]`)
 
-            // Recursively add child nodes (which may themselves be subgraphs)
+            // Add child nodes
             const children = parentMap.get(node.id)
-            const childLines = convertNodes(children, parentMap, indentLevel + 1)
-            lines.push(childLines)
+            children.forEach(child => {
+                const childId = sanitizeId(child.id);
+                const childLabel = child.data.label || child.id;
+                lines.push(`        ${childId}[${childLabel}]`);
+            })
 
-            lines.push(`${indent}end`)
+            lines.push(`    end`)
         } else {
-            // Regular node (leaf node with no children)
-            lines.push(`${indent}${id}[${label}]`)
+            // Regular node
+            lines.push(`    ${id}[${label}]`)
         }
     })
 
@@ -108,4 +103,79 @@ function convertToMermaid(reactFlowData) {
     const edges = convertEdges(reactFlowData.edges)
 
     return `${header}\n${nodes}\n${edges}`
+}
+
+
+async function handleConvert() {
+    // Convert to mermaid syntax
+    const mermaidSyntax = convertToMermaid(sampleData)
+
+    // Display the mermaid syntax in the textarea
+    document.getElementById('mermaidCode').value = mermaidSyntax;
+
+    // Render the mermaid diagram
+    const outputDiv = document.getElementById('mermaidOutput')
+    outputDiv.innerHTML = '' // Clear previous output
+
+    const { svg } = await mermaid.render('mermaid-diagram', mermaidSyntax)
+    outputDiv.innerHTML = svg
+
+    document.getElementById('exportSvgBtn').disabled = false
+    document.getElementById('exportPngBtn').disabled = false
+
+}
+
+function exportAsSvg() {
+    const svg = document.querySelector('#mermaidOutput svg')
+    if (!svg) return
+
+    const svgData = new XMLSerializer().serializeToString(svg)
+    const blob = new Blob([svgData], { type: 'image/svg+xml' })
+    downloadFile(blob, 'mermaid-diagram.svg')
+}
+
+function exportAsPng() {
+    const svg = document.querySelector('#mermaidOutput svg')
+    if (!svg) return
+
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+
+    // Get SVG dimensions from viewBox or bounding box
+    const bbox = svg.getBBox()
+    const viewBox = svg.viewBox.baseVal
+    const width = viewBox.width || bbox.width || 800
+    const height = viewBox.height || bbox.height || 600
+
+    // Clone and set explicit dimensions on SVG
+    const svgClone = svg.cloneNode(true)
+    svgClone.setAttribute('width', width)
+    svgClone.setAttribute('height', height)
+
+    const svgData = new XMLSerializer().serializeToString(svgClone)
+    const img = new Image()
+
+    img.onload = function () {
+        const scale = 3
+        canvas.width = width * scale
+        canvas.height = height * scale
+
+        ctx.scale(scale, scale)
+        ctx.drawImage(img, 0, 0, width, height)
+
+        canvas.toBlob(function (blob) {
+            downloadFile(blob, 'mermaid-diagram.png')
+        })
+    }
+
+    const svgBase64 = btoa(unescape(encodeURIComponent(svgData)))
+    img.src = 'data:image/svg+xml;base64,' + svgBase64
+}
+
+function downloadFile(blob, filename) {
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = filename
+    link.click()
+    URL.revokeObjectURL(link.href)
 }
