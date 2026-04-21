@@ -1,6 +1,7 @@
 {
   "name": "react-flow-to-mermaid",
   "version": "1.0.0",
+  "type": "module",
   "description": "A simple POC to convert React Flow graphs to Mermaid diagrams",
   "main": "index.html",
   "scripts": {
@@ -20,6 +21,8 @@
   },
   "dependencies": {
     "@carbon/web-components": "^2.51.1",
-    "@serverlessworkflow/sdk-typescript": "^0.8.4"
+    "@serverlessworkflow/sdk": "^1.0.1",
+    "@serverlessworkflow/sdk-typescript": "^0.8.4",
+    "yaml": "^2.8.3"
   }
 }
