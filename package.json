@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "description": "A simple POC to convert React Flow graphs to Mermaid diagrams",
-  "main": "index.html",
+  "main": "src/index.html",
   "scripts": {
-    "start": "npx http-server -p 8080 -o"
+    "start": "npx http-server ./src -p 8080 -o",
+    "build": "tsc",
+    "convert-workflow": "npx ts-node src/sdk-to-mermaid.ts"
   },
   "keywords": [
     "react-flow",

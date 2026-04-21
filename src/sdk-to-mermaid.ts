@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { parse } from 'yaml';
 
 // Read YAML file
-const yamlContent = readFileSync('workflow.yaml', 'utf8');
+const yamlContent = readFileSync('./examples/workflow.yaml', 'utf8');
 
 // Parse YAML to plain object
 const workflow = parse(yamlContent);
