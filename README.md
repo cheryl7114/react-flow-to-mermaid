@@ -31,7 +31,12 @@ A tool that converts React Flow diagrams into Mermaid flowchart syntax, with sup
    npm install
    ```
 
-3. **Start the development server**:
+3. **Build TypeScript files** (required for CLI conversion):
+   ```bash
+   npm run build
+   ```
+
+4. **Start the development server**:
    ```bash
    npm start
    ```
@@ -44,6 +49,41 @@ A tool that converts React Flow diagrams into Mermaid flowchart syntax, with sup
 ### Alternative: Direct Browser Access
 
 You can also open `index.html` directly in your browser, but using `npm start` is recommended for the best experience.
+
+### CLI Workflow Conversion
+
+Convert Serverless Workflow YAML files to Mermaid diagrams from the command line:
+
+1. **Place your workflow YAML file** in the `examples/` directory (or modify the path in `src/sdk-to-mermaid.ts`)
+
+2. **Run the conversion**:
+   ```bash
+   npm run convert-workflow
+   ```
+
+3. **View the output**: The Mermaid diagram code will be printed to the console
+
+**Example workflow.yaml structure:**
+```yaml
+document:
+  dsl: '1.0.0'
+  namespace: default
+  name: order-processing
+  version: '1.0.0'
+do:
+  - validateOrder:
+      call: http
+      with:
+        method: post
+        endpoint: https://api.example.com/validate
+  - checkInventory:
+      call: http
+      with:
+        method: get
+        endpoint: https://api.example.com/inventory
+```
+
+This feature uses the [@serverlessworkflow/sdk](https://github.com/serverlessworkflow/sdk-typescript) to parse Serverless Workflow DSL and convert it to Mermaid flowchart syntax.
 
 ## Usage
 
