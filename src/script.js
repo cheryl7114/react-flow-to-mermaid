@@ -179,3 +179,32 @@ function downloadFile(blob, filename) {
     link.click()
     URL.revokeObjectURL(link.href)
 }
+
+function handleDownloadReactFlow() {
+    const reactFlowElement = document.querySelector('#reactflow .react-flow__viewport')
+
+    if (!reactFlowElement) {
+        console.error('React Flow viewport not found')
+        return
+    }
+
+    htmlToImage.toPng(reactFlowElement, {
+        backgroundColor: '#ffffff',
+        width: 1920, 
+        height: 1080, 
+        style: {
+            width: '1920px',
+            height: '1080px',
+            transform: 'none'
+        }
+    }) 
+    .then(function (dataUrl) {
+        const a = document.createElement('a')
+        a.setAttribute('download', 'reactflow-diagram.png')
+        a.setAttribute('href', dataUrl)
+        a.click()
+    }) 
+    .catch(function (error) {
+        console.error('Error generating image:', error)
+    })
+}
