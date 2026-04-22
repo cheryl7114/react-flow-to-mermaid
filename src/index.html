@@ -42,9 +42,15 @@
 
         #mermaidOutput {
             margin-top: 2%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: inline-block;
+            width: fit-content;
+            max-width: 100%;
+        }
+
+        #mermaidOutput svg {
+            display: block;
+            max-width: 100%;
+            height: auto;
         }
     </style>
 </head>

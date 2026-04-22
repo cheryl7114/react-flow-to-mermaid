@@ -120,9 +120,32 @@ async function handleConvert() {
     const { svg } = await mermaid.render('mermaid-diagram', mermaidSyntax)
     outputDiv.innerHTML = svg
 
+    // Crop the SVG to remove whitespace (for the export)
+    const svgElement = outputDiv.querySelector('svg')
+    if (svgElement) {
+        cropSvgWhitespace(svgElement)
+    }
+
     document.getElementById('exportSvgBtn').disabled = false
     document.getElementById('exportPngBtn').disabled = false
 
+}
+
+function cropSvgWhitespace(svg) {
+    // Get the bounding box of all content in the SVG
+    const bbox = svg.getBBox()
+    
+    // Add a small padding (optional)
+    const padding = 2
+    
+    // Update the viewBox to match the content bounds with padding
+    svg.setAttribute('viewBox',
+        `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + padding * 2} ${bbox.height + padding * 2}`
+    )
+    
+    // Set width and height to match the new viewBox for proper scaling
+    svg.setAttribute('width', bbox.width + padding * 2)
+    svg.setAttribute('height', bbox.height + padding * 2)
 }
 
 function exportAsSvg() {
@@ -188,13 +211,18 @@ function handleDownloadReactFlow() {
         return
     }
 
+    // Get the actual bounding box of the content
+    const bbox = reactFlowElement.getBoundingClientRect()
+    
+    // Higher scale for higher resolution
+    const scale = 3
+
     htmlToImage.toPng(reactFlowElement, {
         backgroundColor: '#ffffff',
-        width: 1920, 
-        height: 1080, 
+        width: bbox.width * scale, 
+        height: bbox.height * scale, 
+        pixelRatio: scale,
         style: {
-            width: '1920px',
-            height: '1080px',
             transform: 'none'
         }
     }) 
